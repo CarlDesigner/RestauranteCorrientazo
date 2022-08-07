@@ -1,0 +1,84 @@
+@startuml "Diagrama relacional"
+
+entity Mesa {
+    id integer <<PK>> 
+    --
+    numero varchar(10) <<NN>> <<UQ>>
+}
+
+entity Pedido {
+    id integer <<PK>>
+    --
+    cliente varchar(100) <<NN>>
+    estado varchar(20) <<NN>>
+    --
+    id_mesa integer <<NN>> <<FK>>
+}
+
+entity Adicional {
+    id integer <<PK>>
+    --
+    nombre varchar(100) <<NN>>
+    precio integer <<NN>>
+}
+
+entity PedidoAdicional {
+    id_pedido integer <<PK>> <<FK>>
+    id_adicional integer <<PK>> <<FK>>
+}
+
+entity OpcionPedido {
+    id_pedido integer <<PK>>
+    --
+    precio integer <<NN>>
+    tipo varchar(10) <<NN>>
+    --
+    id_sopa integer <<FK>>
+    id_principio integer <<NN>> <<FK>>
+    id_carne integer <<NN>> <<FK>>
+    id_ensalada integer <<FK>>
+    id_jugo integer <<NN>> <<FK>>
+}
+
+entity OpcionSopa {
+    id integer <<PK>>
+    --
+    nombre varchar(100) <<NN>>
+}
+
+entity OpcionPrincipio {
+    id integer <<PK>> <<FK>>
+    --
+    nombre varchar(100) <<NN>>
+}
+
+entity OpcionCarne {
+    id integer <<PK>>
+    --
+    nombre varchar(100) <<NN>>
+}
+
+entity OpcionEnsalada {
+    id integer <<PK>>
+    --
+    nombre varchar(100) <<NN>>
+}
+
+entity OpcionJugo {
+    id integer <<PK>>
+    --
+    nombre varchar(100) <<NN>>
+}
+
+Mesa ||--o{ Pedido
+Pedido ||-right-|{ PedidoAdicional
+Adicional ||--|{ PedidoAdicional
+Pedido ||--|| OpcionPedido
+
+OpcionPedido }o--o| OpcionSopa
+OpcionPedido }o--|| OpcionPrincipio
+OpcionPedido }o--|| OpcionCarne
+OpcionPedido }o--o| OpcionEnsalada
+OpcionPedido }o--|| OpcionJugo
+
+@enduml
