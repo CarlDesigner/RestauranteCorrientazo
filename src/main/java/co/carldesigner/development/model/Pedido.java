@@ -8,6 +8,8 @@ public class Pedido {
     private EstadoPedido estado;
     private List<Adicional> adicionales;
     private OpcionPedido opcion;
+    private Integer id;
+
     public Pedido(String cliente) {
         this.cliente = cliente;
         this.estado = EstadoPedido.PENDIENTE_ENTREGAR;
@@ -19,6 +21,19 @@ public class Pedido {
         this.estado = EstadoPedido.PENDIENTE_ENTREGAR;
         this.adicionales = new ArrayList<>();
     }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setEstado(EstadoPedido estado) {
+        this.estado = estado;
+    }
+
     public String getCliente() {
         return cliente;
     }
@@ -44,11 +59,9 @@ public class Pedido {
                         .reduce((a, b) -> a + b)
                         .orElse(0);
     }
-
     @Override
     public String toString() {
         return "Pedido [cliente=" + cliente + ", estado=" + estado + ", opcion=" + opcion
                 + ", adicionales=" + adicionales + "]";
     }
-
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+
 import co.carldesigner.development.model.Bandeja;
 import co.carldesigner.development.model.Completo;
 import co.carldesigner.development.model.EstadoPedido;
@@ -91,12 +92,13 @@ public class PedidoView {
             }
         }
     }
-    public void mostrarEstadoMesa(Mesa mesa) {
+
+    public void mostrarEstadoMesa(Mesa mesa, List<Pedido> pedidos) {
         System.out.println(mesa);
         System.out.println("Pedidos:");
-        mesa.getPedidos()
-                .forEach(System.out::println);
+        pedidos.forEach(System.out::println);
     }
+
     public void mostrarMensaje(String mensaje) {
         System.out.println(mensaje);
     }
@@ -104,17 +106,15 @@ public class PedidoView {
         System.out.println(error);
     }
 
-    public Pedido seleccionarPedidoEntrega(Mesa mesa) {
-        var pedidos = mesa.getPedidos().stream()
+    public Pedido seleccionarPedidoEntrega(List<Pedido> datos) {
+        var pedidos = datos.stream()
                 .filter(p -> p.getEstado() == EstadoPedido.PENDIENTE_ENTREGAR)
                 .collect(Collectors.toList());
 
         return pedirOpcion(pedidos, "Pedido");
     }
-
     public Integer leerEfectivo() {
         Integer respuesta = null;
-
         while (respuesta == null) {
             try {
                 System.out.print("Ingrese el valor de efectivo recibido: ");
@@ -125,8 +125,6 @@ public class PedidoView {
                 scanner.nextLine();
             }
         }
-
         return respuesta;
     }
-
 }

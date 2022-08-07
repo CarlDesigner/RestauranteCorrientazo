@@ -3,8 +3,8 @@ package co.carldesigner.development.view;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-import co.carldesigner.development.controller.RestauranteControlador;
 
+import co.carldesigner.development.controller.RestauranteControlador;
 public class PrincipalVista {
     private Scanner scanner;
     private RestauranteControlador controlador; 
@@ -106,7 +106,7 @@ public class PrincipalVista {
                 case 0:
                     break;
                 case 1:
-                    // TODO: Implementar
+                    controlador.agregarMesa();
                     break;
                 case 2:
                     // TODO: Implementar
