@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import co.carldesigner.development.model.Bandeja;
 import co.carldesigner.development.model.Completo;
 import co.carldesigner.development.model.EstadoPedido;
@@ -20,16 +21,13 @@ import co.carldesigner.development.model.OpcionPrincipio;
 import co.carldesigner.development.model.OpcionSopa;
 import co.carldesigner.development.model.Pedido;
 import co.carldesigner.development.util.JDBCUtilities;
-
 public class PedidoDao {
-
     public void adicionarPedidoMesa(Mesa mesa, Pedido pedido) throws SQLException {
         Connection conn = null;
         PreparedStatement stmt1 = null;
         Statement stmt2 = null;
         try {
             pedido.setId(generarConsecutivo());
-
             conn = JDBCUtilities.getConnection();
             var sql = "INSERT INTO Pedido (id, cliente, estado, id_mesa)"
                     + " VALUES (?, ?, ?, ?)";
@@ -39,7 +37,6 @@ public class PedidoDao {
             stmt1.setString(3, pedido.getEstado().toString());
             stmt1.setInt(4, mesa.getId());
             stmt1.executeUpdate();
-
             stmt2 = conn.createStatement();
             sql = "INSERT INTO OpcionPedido (id_pedido, precio, tipo, id_sopa, id_carne, id_principio, id_ensalada, id_jugo)";
             sql += " VALUES (";
@@ -71,7 +68,6 @@ public class PedidoDao {
             }
         }
     }
-
     private Integer generarConsecutivo() throws SQLException {
         var respuesta = 0;
         Connection conn = null;
@@ -98,7 +94,6 @@ public class PedidoDao {
         }
         return respuesta;
     }
-
     public List<Pedido> listar(Mesa mesa) throws SQLException {
         List<Pedido> respuesta = new ArrayList<>();
         Connection conn = null;
@@ -124,43 +119,33 @@ public class PedidoDao {
                 var pedido = new Pedido(rset.getString("cliente"));
                 pedido.setId(rset.getInt("id"));
                 pedido.setEstado(EstadoPedido.valueOf(rset.getString("estado")));
-
                 OpcionPedido opcion = null;
                 if (rset.getString("tipo").equalsIgnoreCase("Completo")) {
                     var op = new Completo(rset.getInt("precio"));
-
                     var sopa = new OpcionSopa(rset.getString("sopa"));
                     sopa.setId(rset.getInt("id_sopa"));
                     op.setSopa(sopa);
-
                     opcion = op;
                 } else {
                     opcion = new Bandeja(rset.getInt("precio"));
                 }
-
                 var principio = new OpcionPrincipio(rset.getString("principio"));
                 principio.setId(rset.getInt("id_principio"));
                 opcion.setPrincipio(principio);
-
                 var carne = new OpcionCarne(rset.getString("carne"));
                 carne.setId(rset.getInt("id_carne"));
                 opcion.setCarne(carne);
-
                 if (rset.getString("ensalada") != null) {
                     var ensalada = new OpcionEnsalada(rset.getString("ensalada"));
                     ensalada.setId(rset.getInt("id_ensalada"));
                     opcion.setEnsalada(ensalada);
                 }
-
                 var jugo = new OpcionJugo(rset.getString("jugo"));
                 jugo.setId(rset.getInt("id_jugo"));
                 opcion.setJugo(jugo);
-
                 pedido.setOpcion(opcion);
-
                 respuesta.add(pedido);
             }
-
         } finally {
             if (rset != null) {
                 rset.close();
@@ -174,7 +159,6 @@ public class PedidoDao {
         }
         return respuesta;
     }
-
     public void entregarPedido(Pedido pedido) throws SQLException {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -187,6 +171,41 @@ public class PedidoDao {
         } finally {
             if (stmt != null) {
                 stmt.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+    }
+
+    public void eliminarPedidosDeMesa(Mesa mesa) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt1 = null;
+        PreparedStatement stmt2 = null;
+        try {
+            conn = JDBCUtilities.getConnection();
+            var sql = "DELETE FROM OpcionPedido"
+                    + " WHERE id_pedido IN ("
+                    + "    SELECT id"
+                    + "    FROM Pedido"
+                    + "    WHERE id_mesa = ?"
+                    + ");";
+            stmt1 = conn.prepareStatement(sql);
+            stmt1.setInt(1, mesa.getId());
+            stmt1.executeUpdate();
+
+            sql = "DELETE FROM Pedido"
+                    + " WHERE id_mesa = ?;";
+            stmt2 = conn.prepareStatement(sql);
+            stmt2.setInt(1, mesa.getId());
+            stmt2.executeUpdate();
+
+        } finally {
+            if (stmt2 != null) {
+                stmt2.close();
+            }
+            if (stmt1 != null) {
+                stmt1.close();
             }
             if (conn != null) {
                 conn.close();
