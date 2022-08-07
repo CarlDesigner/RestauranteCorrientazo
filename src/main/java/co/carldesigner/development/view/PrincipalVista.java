@@ -6,17 +6,13 @@ import java.util.Scanner;
 import co.carldesigner.development.controller.RestauranteControlador;
 
 public class PrincipalVista {
-
     private Scanner scanner;
     private RestauranteControlador controlador; 
-
     public PrincipalVista() {
         scanner = new Scanner(System.in);
         controlador = new RestauranteControlador();
     }
-
     public void iniciarAplicacion() {
-
         var mostrarMenu = true;
         while (mostrarMenu) {
             limpiarPantalla();
@@ -49,12 +45,10 @@ public class PrincipalVista {
             esperarEnter();
         }
     }
-
     public void esperarEnter() {
         System.out.print("Presione una tecla para continuar");
         scanner.nextLine();
     }
-
     private void gestionPedidos() {
         limpiarPantalla();
         System.out.println(".: GESTION DE PEDIDO :.");
@@ -72,23 +66,18 @@ public class PrincipalVista {
                 case 0:
                     break;
                 case 1:
-                    // TODO: Implementar
                     controlador.agregarPedidoAMesa();
                     break;
                 case 2:
-                    // TODO: Implementar
                     controlador.agregarAdicionalAPedido();
                     break;
                 case 3:
-                    // TODO: Implementar
                     controlador.entregarPedidoDeMesa();
                     break;
                 case 4:
-                    // TODO: Implementar
                     controlador.pagarCuentaMesa();
                     break;
                 case 5:
-                    // TODO: Implementar
                     controlador.consultarEstadoMesa();
                     break;
                 default:
@@ -98,7 +87,6 @@ public class PrincipalVista {
             System.err.println("Opción inválida.");
         }
     }
-
     private void gestionMaestras() {
         limpiarPantalla();
         System.out.println(".: GESTION DE TABLAS MAESTRAS :.");
@@ -145,7 +133,6 @@ public class PrincipalVista {
             System.err.println("Opción inválida.");
         }
     }
-
     private void limpiarPantalla() {
         for(var i = 0; i < 50; i++){
             System.out.println();

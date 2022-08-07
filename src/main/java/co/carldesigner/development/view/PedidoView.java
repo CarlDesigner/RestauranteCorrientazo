@@ -3,9 +3,11 @@ package co.carldesigner.development.view;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import co.carldesigner.development.model.Bandeja;
 import co.carldesigner.development.model.Completo;
+import co.carldesigner.development.model.EstadoPedido;
 import co.carldesigner.development.model.Mesa;
 import co.carldesigner.development.model.OpcionCarne;
 import co.carldesigner.development.model.OpcionEnsalada;
@@ -14,33 +16,25 @@ import co.carldesigner.development.model.OpcionPedido;
 import co.carldesigner.development.model.OpcionPrincipio;
 import co.carldesigner.development.model.OpcionSopa;
 import co.carldesigner.development.model.Pedido;
-
 public class PedidoView {
-
     private Scanner scanner;
-
     public PedidoView() {
         this.scanner = new Scanner(System.in);
     }
-
     public Mesa seleccionarMesa(List<Mesa> mesas) {
         return pedirOpcion(mesas, "Mesas");
     }
-
     public Pedido pedirInformacionPedido(List<OpcionSopa> sopas, List<OpcionPrincipio> principios,
             List<OpcionCarne> carnes, List<OpcionEnsalada> ensaladas, List<OpcionJugo> jugos) {
         // Pedir informacion del cliente
         System.out.print("Ingrese el nombre (descripcion) del cliente: ");
         var cliente = scanner.nextLine();
-
         // Pedir opcion de pedido (completo o bandeja)
         var opcion = pedirOpcionPedido();
-
         if (opcion instanceof Completo) {
             // Pedir Sopa
             ((Completo) opcion).setSopa(pedirOpcion(sopas, "Sopas"));
         }
-
         // Pedir Principio
         opcion.setPrincipio(pedirOpcion(principios, "Principios"));
         // Pedir Carne
@@ -49,14 +43,11 @@ public class PedidoView {
         opcion.setEnsalada(pedirOpcion(ensaladas, "Ensaladas", true));
         // Pedir Jugo
         opcion.setJugo(pedirOpcion(jugos, "Jugos"));
-
         return new Pedido(cliente, opcion);
     }
-
     private <T> T pedirOpcion(List<T> opciones, String nombre) {
         return pedirOpcion(opciones, nombre, false);
     }
-
     private <T> T pedirOpcion(List<T> opciones, String nombre, Boolean opcional) {
         while (true) {
             // Listo las opciones existentes
@@ -67,7 +58,6 @@ public class PedidoView {
             if (opcional) {
                 System.out.printf("%d -> %s %n", 0, "Ninguno");
             }
-
             // Selecciono la mesa
             System.out.print("Cual es su elección: ");
             try {
@@ -86,7 +76,6 @@ public class PedidoView {
             }
         }
     }
-
     private OpcionPedido pedirOpcionPedido() {
         while (true) {
             System.out.println("Opciones de pedido:\nC -> Almuerzo Completo\nB -> Bandeja");
@@ -102,20 +91,42 @@ public class PedidoView {
             }
         }
     }
-
     public void mostrarEstadoMesa(Mesa mesa) {
         System.out.println(mesa);
         System.out.println("Pedidos:");
         mesa.getPedidos()
                 .forEach(System.out::println);
     }
-
     public void mostrarMensaje(String mensaje) {
         System.out.println(mensaje);
     }
-
     public void mostrarError(String error) {
         System.out.println(error);
+    }
+
+    public Pedido seleccionarPedidoEntrega(Mesa mesa) {
+        var pedidos = mesa.getPedidos().stream()
+                .filter(p -> p.getEstado() == EstadoPedido.PENDIENTE_ENTREGAR)
+                .collect(Collectors.toList());
+
+        return pedirOpcion(pedidos, "Pedido");
+    }
+
+    public Integer leerEfectivo() {
+        Integer respuesta = null;
+
+        while (respuesta == null) {
+            try {
+                System.out.print("Ingrese el valor de efectivo recibido: ");
+                respuesta = scanner.nextInt();
+            } catch (InputMismatchException ex) {
+                System.err.println("Valor inválidi. Intente de nuevo.");
+            } finally {
+                scanner.nextLine();
+            }
+        }
+
+        return respuesta;
     }
 
 }
