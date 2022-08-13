@@ -12,7 +12,7 @@ public class JDBCUtilities {
     // DTO -> Data Transfer Object
     // VO -> Value Object
 
-    private static final String DATABASE = "C:\\Users\\user\\Downloads\\MisionTIC2022\\Ciclo2\\Programacion\\corrientazo\\src\\main\\resources\\corrientazo.db";
+    private static final String DATABASE = "corrientazo.db";
 
     public static Connection getConnection() throws SQLException {
         var url = "jdbc:sqlite:" + DATABASE;

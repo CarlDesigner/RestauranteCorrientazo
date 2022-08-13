@@ -5,17 +5,54 @@
  */
 package co.carldesigner.development.view.gui;
 
+import co.carldesigner.development.controller.ResturanteGUIControlador;
+import co.carldesigner.development.exception.EfectivoInsuficienteException;
+import co.carldesigner.development.model.Bandeja;
+import co.carldesigner.development.model.Completo;
+import co.carldesigner.development.model.EstadoPedido;
+import co.carldesigner.development.model.Mesa;
+import co.carldesigner.development.model.OpcionCarne;
+import co.carldesigner.development.model.OpcionEnsalada;
+import co.carldesigner.development.model.OpcionJugo;
+import co.carldesigner.development.model.OpcionPedido;
+import co.carldesigner.development.model.OpcionPrincipio;
+import co.carldesigner.development.model.OpcionSopa;
+import co.carldesigner.development.model.Pedido;
+import co.carldesigner.development.view.gui.tablemodel.PedidoTableModel;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
+
 /**
  *
  * @author ROG
  */
 public class PnlPedidos extends javax.swing.JPanel {
 
+    private ResturanteGUIControlador controlador;
+
+    private PedidoTableModel pedidoTableModel;
+
     /**
      * Creates new form PnlPedidos
      */
     public PnlPedidos() {
+        controlador = new ResturanteGUIControlador();
+
         initComponents();
+
+        this.pedidoTableModel = new PedidoTableModel();
+        tblPedidos.setModel(pedidoTableModel);
+        tblPedidos.getSelectionModel()
+                .addListSelectionListener(evt -> seleccionarPedido());
+
+        cargarListaMesas();
+        cargarOpcionesAlimentos();
     }
 
     /**
@@ -28,49 +65,50 @@ public class PnlPedidos extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        txtTotalMesa = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
-        jButton1 = new javax.swing.JButton();
+        spnEfectivo = new javax.swing.JSpinner();
+        btnPagar = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        txtDevuelta = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        lstMesas = new javax.swing.JList<>();
         jPanel2 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
-        jButton2 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList<>();
+        btnAgregarPedido = new javax.swing.JButton();
+        btnEntregarPedido = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        tblPedidos = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
+        txtCliente = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        rbCompleto = new javax.swing.JRadioButton();
+        rbBandeja = new javax.swing.JRadioButton();
         jLabel6 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cmbSopa = new javax.swing.JComboBox<>();
         jLabel7 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox<>();
+        cmbPrincipio = new javax.swing.JComboBox<>();
         jLabel8 = new javax.swing.JLabel();
-        jComboBox3 = new javax.swing.JComboBox<>();
-        jCheckBox1 = new javax.swing.JCheckBox();
-        jComboBox4 = new javax.swing.JComboBox<>();
+        cmbCarne = new javax.swing.JComboBox<>();
+        chkEnsalada = new javax.swing.JCheckBox();
+        cmbEnsalada = new javax.swing.JComboBox<>();
         jLabel9 = new javax.swing.JLabel();
-        jComboBox5 = new javax.swing.JComboBox<>();
-        jButton3 = new javax.swing.JButton();
+        cmbJugo = new javax.swing.JComboBox<>();
+        btnCrearPedido = new javax.swing.JButton();
         jLabel10 = new javax.swing.JLabel();
-        jComboBox6 = new javax.swing.JComboBox<>();
-        jButton4 = new javax.swing.JButton();
+        cmbAdicionales = new javax.swing.JComboBox<>();
+        btnAgregarAdicional = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblAdicionales = new javax.swing.JTable();
         jLabel11 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
+        txtTotalPedido = new javax.swing.JTextField();
 
-        setLayout(new java.awt.GridLayout());
+        setLayout(new java.awt.GridLayout(1, 0));
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Mesas"));
         jPanel1.setLayout(new java.awt.BorderLayout());
@@ -88,16 +126,16 @@ public class PnlPedidos extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
         jPanel4.add(jLabel1, gridBagConstraints);
 
-        jTextField1.setEditable(false);
-        jTextField1.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        jTextField1.setText("0");
+        txtTotalMesa.setEditable(false);
+        txtTotalMesa.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtTotalMesa.setText("0");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 5);
-        jPanel4.add(jTextField1, gridBagConstraints);
+        jPanel4.add(txtTotalMesa, gridBagConstraints);
 
         jLabel2.setText("Efectivo");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -106,20 +144,27 @@ public class PnlPedidos extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         jPanel4.add(jLabel2, gridBagConstraints);
+
+        spnEfectivo.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 500));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-        jPanel4.add(jSpinner1, gridBagConstraints);
+        jPanel4.add(spnEfectivo, gridBagConstraints);
 
-        jButton1.setText("Pagar");
+        btnPagar.setText("Pagar");
+        btnPagar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPagarActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-        jPanel4.add(jButton1, gridBagConstraints);
+        jPanel4.add(btnPagar, gridBagConstraints);
 
         jLabel3.setText("Devuelta");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -129,24 +174,25 @@ public class PnlPedidos extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 0);
         jPanel4.add(jLabel3, gridBagConstraints);
 
-        jTextField2.setEditable(false);
-        jTextField2.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
-        jTextField2.setText("0");
+        txtDevuelta.setEditable(false);
+        txtDevuelta.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
+        txtDevuelta.setText("0");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 5);
-        jPanel4.add(jTextField2, gridBagConstraints);
+        jPanel4.add(txtDevuelta, gridBagConstraints);
 
         jPanel1.add(jPanel4, java.awt.BorderLayout.PAGE_END);
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
+        lstMesas.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        lstMesas.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                lstMesasValueChanged(evt);
+            }
         });
-        jScrollPane1.setViewportView(jList1);
+        jScrollPane1.setViewportView(lstMesas);
 
         jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
@@ -155,22 +201,54 @@ public class PnlPedidos extends javax.swing.JPanel {
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Pedidos"));
         jPanel2.setLayout(new java.awt.BorderLayout());
 
-        jButton2.setText("Agregar Pedido a mesa");
-        jPanel5.add(jButton2);
+        btnAgregarPedido.setText("Agregar Pedido");
+        btnAgregarPedido.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAgregarPedidoActionPerformed(evt);
+            }
+        });
+        jPanel5.add(btnAgregarPedido);
 
-        jButton5.setText("Entregar pedido");
-        jPanel5.add(jButton5);
+        btnEntregarPedido.setText("Entregar pedido");
+        btnEntregarPedido.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEntregarPedidoActionPerformed(evt);
+            }
+        });
+        jPanel5.add(btnEntregarPedido);
 
         jPanel2.add(jPanel5, java.awt.BorderLayout.PAGE_START);
 
-        jList2.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane2.setViewportView(jList2);
+        tblPedidos.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Cliente", "Entregado"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Boolean.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false
+            };
 
-        jPanel2.add(jScrollPane2, java.awt.BorderLayout.CENTER);
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblPedidos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane4.setViewportView(tblPedidos);
+
+        jPanel2.add(jScrollPane4, java.awt.BorderLayout.CENTER);
 
         add(jPanel2);
 
@@ -178,41 +256,55 @@ public class PnlPedidos extends javax.swing.JPanel {
 
         jLabel5.setText("Tipo");
 
-        jRadioButton1.setText("Completo");
+        buttonGroup1.add(rbCompleto);
+        rbCompleto.setSelected(true);
+        rbCompleto.setText("Completo");
+        rbCompleto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbCompletoActionPerformed(evt);
+            }
+        });
 
-        jRadioButton2.setText("Bandeja");
+        buttonGroup1.add(rbBandeja);
+        rbBandeja.setText("Bandeja");
+        rbBandeja.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbCompletoActionPerformed(evt);
+            }
+        });
 
         jLabel6.setText("Sopa");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
         jLabel7.setText("Principio");
-
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         jLabel8.setText("Carne");
 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        jCheckBox1.setText("Ensalada");
-
-        jComboBox4.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        chkEnsalada.setSelected(true);
+        chkEnsalada.setText("Ensalada");
+        chkEnsalada.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkEnsaladaActionPerformed(evt);
+            }
+        });
 
         jLabel9.setText("Jugo");
 
-        jComboBox5.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        jButton3.setText("Crear Pedido");
+        btnCrearPedido.setText("Crear Pedido");
+        btnCrearPedido.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCrearPedidoActionPerformed(evt);
+            }
+        });
 
         jLabel10.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel10.setText("Adicionales");
 
-        jComboBox6.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbAdicionales.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jButton4.setText("Agregar");
+        btnAgregarAdicional.setText("Agregar");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblAdicionales.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -223,13 +315,13 @@ public class PnlPedidos extends javax.swing.JPanel {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane3.setViewportView(jTable1);
+        jScrollPane3.setViewportView(tblAdicionales);
 
         jLabel11.setText("Total Pedido");
 
-        jTextField4.setEditable(false);
-        jTextField4.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
-        jTextField4.setText("0");
+        txtTotalPedido.setEditable(false);
+        txtTotalPedido.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
+        txtTotalPedido.setText("0");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -243,47 +335,47 @@ public class PnlPedidos extends javax.swing.JPanel {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTextField3))
+                        .addComponent(txtCliente))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(cmbSopa, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jComboBox5, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(cmbJugo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel8)
                             .addComponent(jLabel7)
-                            .addComponent(jCheckBox1))
+                            .addComponent(chkEnsalada))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jComboBox3, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jComboBox4, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(cmbPrincipio, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cmbCarne, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cmbEnsalada, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton3))
+                        .addComponent(btnCrearPedido))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addComponent(jComboBox6, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cmbAdicionales, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4))
+                        .addComponent(btnAgregarAdicional))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jRadioButton1)
+                        .addComponent(rbCompleto)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jRadioButton2)
+                        .addComponent(rbBandeja)
                         .addGap(0, 44, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel11)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTextField4)))
+                        .addComponent(txtTotalPedido)))
                 .addContainerGap())
         );
 
-        jPanel3Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jCheckBox1, jLabel11, jLabel4, jLabel5, jLabel6, jLabel7, jLabel8, jLabel9});
+        jPanel3Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {chkEnsalada, jLabel11, jLabel4, jLabel5, jLabel6, jLabel7, jLabel8, jLabel9});
 
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -291,66 +383,128 @@ public class PnlPedidos extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(jRadioButton1)
-                    .addComponent(jRadioButton2))
+                    .addComponent(rbCompleto)
+                    .addComponent(rbBandeja))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbSopa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbPrincipio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
-                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbCarne, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCheckBox1)
-                    .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(chkEnsalada)
+                    .addComponent(cmbEnsalada, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbJugo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton3)
+                .addComponent(btnCrearPedido)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel10)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton4))
+                    .addComponent(cmbAdicionales, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnAgregarAdicional))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 117, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtTotalPedido, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
         add(jPanel3);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void lstMesasValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstMesasValueChanged
+        if (lstMesas.getSelectedIndex() != -1) {
+            var mesa = lstMesas.getSelectedValue();
+            cargarDatosMesa(mesa);
+        } else {
+            limpiarDatosMesa();
+        }
+    }//GEN-LAST:event_lstMesasValueChanged
+
+    private void btnEntregarPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntregarPedidoActionPerformed
+        if (tblPedidos.getSelectedRowCount() == 0) {
+            mostrarAdvertencia("No se ha seleccionado un pedido a entregar");
+        } else {
+            entregarPedido();
+        }
+    }//GEN-LAST:event_btnEntregarPedidoActionPerformed
+
+    private void rbCompletoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbCompletoActionPerformed
+        if (rbCompleto.isSelected()) {
+            cmbSopa.setEnabled(true);
+        } else {
+            cmbSopa.setEnabled(false);
+            cmbSopa.setSelectedIndex(-1);
+        }
+    }//GEN-LAST:event_rbCompletoActionPerformed
+
+    private void chkEnsaladaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkEnsaladaActionPerformed
+        if (chkEnsalada.isSelected()) {
+            cmbEnsalada.setEnabled(true);
+        } else {
+            cmbEnsalada.setEnabled(false);
+            cmbEnsalada.setSelectedIndex(-1);
+        }
+    }//GEN-LAST:event_chkEnsaladaActionPerformed
+
+    private void btnAgregarPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarPedidoActionPerformed
+        if (lstMesas.getSelectedIndex() == -1) {
+            mostrarAdvertencia("Debe seleccionar la mesa a la cual va a agregar el pedido");
+        } else {
+            tblPedidos.clearSelection();
+            limpiarCamposPedido();
+            txtCliente.requestFocus();
+        }
+    }//GEN-LAST:event_btnAgregarPedidoActionPerformed
+
+    private void btnCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearPedidoActionPerformed
+        if (tblPedidos.getSelectedRowCount() != 0) {
+            mostrarAdvertencia("No puedes modificar un pedido");
+        } else {
+            crearPedido();
+        }
+    }//GEN-LAST:event_btnCrearPedidoActionPerformed
+
+    private void btnPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPagarActionPerformed
+        if (lstMesas.getSelectedIndex() == -1) {
+            mostrarAdvertencia("Debe seleccionar una mesa a pagar");
+        } else {
+            pagarMesa();
+        }
+    }//GEN-LAST:event_btnPagarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JComboBox<String> jComboBox3;
-    private javax.swing.JComboBox<String> jComboBox4;
-    private javax.swing.JComboBox<String> jComboBox5;
-    private javax.swing.JComboBox<String> jComboBox6;
+    private javax.swing.JButton btnAgregarAdicional;
+    private javax.swing.JButton btnAgregarPedido;
+    private javax.swing.JButton btnCrearPedido;
+    private javax.swing.JButton btnEntregarPedido;
+    private javax.swing.JButton btnPagar;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JCheckBox chkEnsalada;
+    private javax.swing.JComboBox<String> cmbAdicionales;
+    private javax.swing.JComboBox<OpcionCarne> cmbCarne;
+    private javax.swing.JComboBox<OpcionEnsalada> cmbEnsalada;
+    private javax.swing.JComboBox<OpcionJugo> cmbJugo;
+    private javax.swing.JComboBox<OpcionPrincipio> cmbPrincipio;
+    private javax.swing.JComboBox<OpcionSopa> cmbSopa;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -362,23 +516,233 @@ public class PnlPedidos extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JList<String> jList1;
-    private javax.swing.JList<String> jList2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JSpinner jSpinner1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JList<Mesa> lstMesas;
+    private javax.swing.JRadioButton rbBandeja;
+    private javax.swing.JRadioButton rbCompleto;
+    private javax.swing.JSpinner spnEfectivo;
+    private javax.swing.JTable tblAdicionales;
+    private javax.swing.JTable tblPedidos;
+    private javax.swing.JTextField txtCliente;
+    private javax.swing.JTextField txtDevuelta;
+    private javax.swing.JTextField txtTotalMesa;
+    private javax.swing.JTextField txtTotalPedido;
     // End of variables declaration//GEN-END:variables
+
+    private void mostrarError(String error, Exception ex) {
+        JOptionPane.showMessageDialog(this, error + ": " + ex.getMessage(),
+                "Restaurante El Corrientazo", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void mostrarAdvertencia(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje,
+                "Restaurante El Corrientazo", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void mostrarInformacion(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje,
+                "Restaurante El Corrientazo", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void cargarListaMesas() {
+        try {
+            lstMesas.removeAll();
+
+            var modelo = new DefaultListModel<Mesa>();
+            modelo.addAll(controlador.listarMesas());
+            lstMesas.setModel(modelo);
+        } catch (SQLException ex) {
+            mostrarError("Error listando mesas", ex);
+        }
+    }
+
+    private void cargarDatosMesa(Mesa mesa) {
+        try {
+            // Cargar el total a pagar de la mesa
+            var total = controlador.calcularTotalMesa(mesa);
+            txtTotalMesa.setText(String.format("$ %,d", total));
+            spnEfectivo.setValue(0);
+            txtDevuelta.setText(String.format("$ %,d", 0));
+
+            // TODO: Cargar los datos de los pedidos de la mesa
+            var pedidos = controlador.listarPedidosMesa(mesa);
+            this.pedidoTableModel.setPedidos(pedidos);
+        } catch (SQLException ex) {
+            mostrarError("Error al cargar datos de mesa", ex);
+        }
+    }
+
+    private void limpiarDatosMesa() {
+        // Limpiar el total a pagar de la mesa
+        txtTotalMesa.setText(String.format("$ %,d", 0));
+        spnEfectivo.setValue(0);
+        txtDevuelta.setText(String.format("$ %,d", 0));
+
+        // Limpiar los datos de los pedidos de la mesa
+        this.pedidoTableModel.setPedidos(new ArrayList<>());
+    }
+
+    private void entregarPedido() {
+        try {
+            var row = tblPedidos.getSelectedRow();
+            var pedido = this.pedidoTableModel.getPedido(row);
+            if (pedido.getEstado() != EstadoPedido.PENDIENTE_ENTREGAR) {
+                mostrarAdvertencia("El pedido ya ha sido entregado");
+            } else {
+                controlador.entregarPedido(pedido);
+
+                this.pedidoTableModel.setPedido(row, pedido);
+                lstMesasValueChanged(null);
+
+                mostrarInformacion("Se ha entregado el pedido");
+            }
+        } catch (SQLException ex) {
+            mostrarError("Error al entregar el pedido", ex);
+        }
+    }
+
+    private void cargarOpcionesAlimentos() {
+        try {
+            cmbSopa.removeAllItems();
+            controlador.listarSopas().forEach(cmbSopa::addItem);
+            cmbSopa.setSelectedIndex(-1);
+
+            cmbPrincipio.removeAllItems();
+            controlador.listarPrincipios().forEach(cmbPrincipio::addItem);
+            cmbPrincipio.setSelectedIndex(-1);
+
+            cmbCarne.removeAllItems();
+            controlador.listarCarnes().forEach(cmbCarne::addItem);
+            cmbCarne.setSelectedIndex(-1);
+
+            cmbEnsalada.removeAllItems();
+            controlador.listarEnsaladas().forEach(cmbEnsalada::addItem);
+            cmbEnsalada.setSelectedIndex(-1);
+
+            cmbJugo.removeAllItems();
+            controlador.listarJugos().forEach(cmbJugo::addItem);
+            cmbJugo.setSelectedIndex(-1);
+        } catch (SQLException ex) {
+            mostrarError("Error cargando opciones de alimentos", ex);
+        }
+    }
+
+    private void limpiarCamposPedido() {
+        txtCliente.setText("");
+        rbCompleto.setSelected(true);
+        rbCompletoActionPerformed(null);
+        cmbSopa.setSelectedIndex(-1);
+        cmbPrincipio.setSelectedIndex(-1);
+        cmbCarne.setSelectedIndex(-1);
+        chkEnsalada.setSelected(true);
+        chkEnsaladaActionPerformed(null);
+        cmbEnsalada.setSelectedIndex(-1);
+        cmbJugo.setSelectedIndex(-1);
+
+        // TODO Falta limpiar la tabla de adicionales 
+        // Mostrar total del pedido
+        txtTotalPedido.setText(String.format("$ %,d", 0));
+    }
+
+    private void cargarCamposPedido(Pedido pedido) {
+        txtCliente.setText(pedido.getCliente());
+
+        if (pedido.getOpcion() instanceof Completo) {
+            rbCompleto.setSelected(true);
+
+            var completo = (Completo) pedido.getOpcion();
+            cmbSopa.setSelectedItem(completo.getSopa());
+        } else {
+            rbBandeja.setSelected(true);
+        }
+        rbCompletoActionPerformed(null);
+
+        cmbPrincipio.setSelectedItem(pedido.getOpcion().getPrincipio());
+        cmbCarne.setSelectedItem(pedido.getOpcion().getCarne());
+
+        if (pedido.getOpcion().getEnsalada() != null) {
+            chkEnsalada.setSelected(true);
+            cmbEnsalada.setSelectedItem(pedido.getOpcion().getEnsalada());
+        } else {
+            chkEnsalada.setSelected(false);
+        }
+        chkEnsaladaActionPerformed(null);
+
+        cmbJugo.setSelectedItem(pedido.getOpcion().getJugo());
+
+        // TODO Falta limpiar la tabla de adicionales 
+        // Mostrar total del pedido
+        txtTotalPedido.setText(String.format("$ %,d", pedido.calcularTotal()));
+    }
+
+    private void crearPedido() {
+        // TODO Validar campos
+
+        try {
+            // Agregar el pedido a la base de datos
+            var mesa = lstMesas.getSelectedValue();
+            var pedido = new Pedido(txtCliente.getText());
+
+            OpcionPedido opcion;
+            if (rbCompleto.isSelected()) {
+                var completo = new Completo(12_000);
+                completo.setSopa((OpcionSopa) cmbSopa.getSelectedItem());
+
+                opcion = completo;
+            } else {
+                opcion = new Bandeja(10_000);
+            }
+            opcion.setPrincipio((OpcionPrincipio) cmbPrincipio.getSelectedItem());
+            opcion.setCarne((OpcionCarne) cmbCarne.getSelectedItem());
+            if (chkEnsalada.isSelected()) {
+                opcion.setEnsalada((OpcionEnsalada) cmbEnsalada.getSelectedItem());
+            }
+            opcion.setJugo((OpcionJugo) cmbJugo.getSelectedItem());
+
+            pedido.setOpcion(opcion);
+
+            controlador.agregarPedidoAMesa(mesa, pedido);
+
+            // Agregar pedido a la tabla en la vista
+            this.pedidoTableModel.addPedido(pedido);
+
+            mostrarInformacion("Se ha agregado exitosamente el pedido");
+        } catch (SQLException ex) {
+            mostrarError("Error al crear el pedido", ex);
+        }
+    }
+
+    private void seleccionarPedido() {
+        if (tblPedidos.getSelectedRowCount() == 1) {
+            var row = tblPedidos.getSelectedRow();
+            var pedido = this.pedidoTableModel.getPedido(row);
+            cargarCamposPedido(pedido);
+        } else {
+            limpiarCamposPedido();
+        }
+    }
+
+    private void pagarMesa() {
+        try {
+            var mesa = lstMesas.getSelectedValue();
+            var efectivo = (Integer) spnEfectivo.getValue();
+            var devuelta = controlador.pagarCuentaMesa(mesa, efectivo);
+            
+            txtDevuelta.setText(String.format("$ %,d", devuelta));
+            
+            mostrarInformacion("Se ha pagado por completo la cuenta");
+            lstMesasValueChanged(null);
+
+        } catch (SQLException | EfectivoInsuficienteException ex) {
+            mostrarError("Error al pagar la cuenta", ex);
+        }
+    }
+
 }
